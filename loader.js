@@ -1,7 +1,7 @@
 var your_bookmarklet = (function() {
 
 		// some things we need in here
-		var host = 'http://localhost/',
+		var host = 'http://torrancelearning.com/xapi/bookmarklet/',
 				iframe_url = host + 'xapi-bookmarklet.html',
 				$ = false,
 				doc = document,
@@ -31,7 +31,7 @@ var your_bookmarklet = (function() {
 				loadJquery: function(cb) {
 						// always load jquery because they might have
 						// a prototyped version on page
-						Utils.loadJs(host + '/js/lib/jquery.js');
+						Utils.loadJs(host + 'js/jquery-2.1.3.min.js');
 						// start checking every 100ms to see
 						// if the jQuery object exists yet
 						(function poll() {
