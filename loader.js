@@ -1,147 +1,147 @@
 var your_bookmarklet = (function() {
 
-    // some things we need in here
-    var host = 'http://localhost/',
-        iframe_url = host + 'your_iframe',
-        $ = false,
-        doc = document,
-        head = doc.getElementsByTagName('head')[0],
-        body = doc.getElementsByTagName('body')[0],
-        messageListeners = [],
-        iframe;
- 
-    // general utils
-    var Utils = {
+		// some things we need in here
+		var host = 'http://localhost/',
+				iframe_url = host + 'xapi-bookmarklet.html',
+				$ = false,
+				doc = document,
+				head = doc.getElementsByTagName('head')[0],
+				body = doc.getElementsByTagName('body')[0],
+				messageListeners = [],
+				iframe;
 
-        // load a javascript file
-        loadJs: function(src) {
-            var js = doc.createElement('script');
-            js.type = 'text/javascript';
-            js.src = src;
-            js.async = true;
-            head.appendChild(js);
-        },
+		// general utils
+		var Utils = {
 
-        addMessageListener: function(message, callback) {
-            messageListeners[message] = callback;
-        },
+				// load a javascript file
+				loadJs: function(src) {
+						var js = doc.createElement('script');
+						js.type = 'text/javascript';
+						js.src = src;
+						js.async = true;
+						head.appendChild(js);
+				},
 
-        // if jquery does not exist, load it
-        // and callback when jquery is loaded
-        loadJquery: function(cb) {
-            // always load jquery because they might have
-            // a prototyped version on page
-            Utils.loadJs(host + '/js/lib/jquery.js');
-            // start checking every 100ms to see
-            // if the jQuery object exists yet
-            (function poll() {
-                setTimeout(function() {
-                    // jquery exists, callback
-                    if(window.jQuery) {
-                        $ = window.jQuery;
-                        cb();
-                    // jquery doesn't exist,
-                    // keep trying
-                    } else {
-                        poll();
-                    }
-                }, 100);
-            })();
-        }
+				addMessageListener: function(message, callback) {
+						messageListeners[message] = callback;
+				},
 
-    }
+				// if jquery does not exist, load it
+				// and callback when jquery is loaded
+				loadJquery: function(cb) {
+						// always load jquery because they might have
+						// a prototyped version on page
+						Utils.loadJs(host + '/js/lib/jquery.js');
+						// start checking every 100ms to see
+						// if the jQuery object exists yet
+						(function poll() {
+								setTimeout(function() {
+										// jquery exists, callback
+										if(window.jQuery) {
+												$ = window.jQuery;
+												cb();
+										// jquery doesn't exist,
+										// keep trying
+										} else {
+												poll();
+										}
+								}, 100);
+						})();
+				}
 
-    var Bookmarklet = {
+		}
 
-        hide: function() {
-            iframe.fadeOut('fast');
-        },
+		var Bookmarklet = {
 
-        show: function(dimensions) {
-            if(dimensions) {
-                iframe.css(dimensions);
-            }
-            if(!iframe.is(':visible')) {
-                iframe.fadeIn('fast');
-            }
-        },
-        
-        // this is accessed by itself
-        // when it wants to create a new one
-        reset: init
-        
-    }
+				hide: function() {
+						iframe.fadeOut('fast');
+				},
 
-    window.addEventListener('message', function(e) {
-        var data = e.data;
-        // the window is trying to execute
-        // some arbitrary custom event
-        if(!!data.event) {
-            messageListeners[data.event](data.args);
-        }
-    }, false);
+				show: function(dimensions) {
+						if(dimensions) {
+								iframe.css(dimensions);
+						}
+						if(!iframe.is(':visible')) {
+								iframe.fadeIn('fast');
+						}
+				},
 
-    // listen for calls from iframe
-    Utils.addMessageListener('unload-bookmarklet', function() {
-        Bookmarklet.hide();
-    });
+				// this is accessed by itself
+				// when it wants to create a new one
+				reset: init
 
-    Utils.addMessageListener('resize-iframe', function(dimensions) {
-        Bookmarklet.show(dimensions);
-    });
+		}
 
-    // creates a way to proxy
-    // POST methods to the website directly
-    var Channel = function(path) {
+		window.addEventListener('message', function(e) {
+				var data = e.data;
+				// the window is trying to execute
+				// some arbitrary custom event
+				if(!!data.event) {
+						messageListeners[data.event](data.args);
+				}
+		}, false);
 
-        if(iframe) {
-            iframe.remove();
-            iframe = false;
-        }
+		// listen for calls from iframe
+		Utils.addMessageListener('unload-bookmarklet', function() {
+				Bookmarklet.hide();
+		});
 
-        iframe = createIframe(path);
+		Utils.addMessageListener('resize-iframe', function(dimensions) {
+				Bookmarklet.show(dimensions);
+		});
 
-        var c = this,
-            cw = iframe[0].contentWindow;
+		// creates a way to proxy
+		// POST methods to the website directly
+		var Channel = function(path) {
 
-        // provide a way for bookmarklet
-        // to trigger custom events in iframe
-        this.trigger = function(event, args) {
-            cw.postMessage({
-                event: event,
-                args: args 
-            }, '*');
-        }
+				if(iframe) {
+						iframe.remove();
+						iframe = false;
+				}
 
-        // generate the iframe to proxy
-        function createIframe(url) {
-            var i = $('<iframe />')
-                .attr('src', url)
-                .appendTo(body);
-            return i;
-        }
+				iframe = createIframe(path);
 
-        return this;
+				var c = this,
+						cw = iframe[0].contentWindow;
 
-    }
-    
-    function init() {
-        
-        // load jquery
-        Utils.loadJquery(function() {
+				// provide a way for bookmarklet
+				// to trigger custom events in iframe
+				this.trigger = function(event, args) {
+						cw.postMessage({
+								event: event,
+								args: args
+						}, '*');
+				}
 
-            // when jquery is loaded,
-            // create bookmarklet channel
-            new Channel(iframe_url); 
+				// generate the iframe to proxy
+				function createIframe(url) {
+						var i = $('<iframe />')
+								.attr('src', url)
+								.appendTo(body);
+						return i;
+				}
 
-        });
-        
-        return this;
-    
-    };
-    
-    init();
+				return this;
 
-    return Bookmarklet;
+		}
+
+		function init() {
+
+				// load jquery
+				Utils.loadJquery(function() {
+
+						// when jquery is loaded,
+						// create bookmarklet channel
+						new Channel(iframe_url);
+
+				});
+
+				return this;
+
+		};
+
+		init();
+
+		return Bookmarklet;
 
 })();
