@@ -1,7 +1,7 @@
 var your_bookmarklet = (function() {
 
 		// some things we need in here
-		var host = 'https://cdn.rawgit.com/mpkliewer/iframe-bookmarklet-xapi/master/',
+		var host = 'https://cdn.rawgit.com/mpkliewer/iframe-bookmarklet-xapi/v1.0-alpha/',
 				iframe_url = host + 'xapi-bookmarklet.html',
 				$ = false,
 				doc = document,
